@@ -1,4 +1,4 @@
-1. CREATE JENKINS SERVER 
+##1. CREATE JENKINS SERVER 
 #STEP-1: INSTALLING GIT JAVA-1.8.0 MAVEN 
 yum install git java-1.8.0-openjdk maven -y
 
@@ -19,7 +19,7 @@ systemctl start jenkins.service
 systemctl status jenkins.service
 
 
-2. CREATE 2 SLAVES AND CONFIGURE THEM TO JENKINS
+##2. CREATE 2 SLAVES AND CONFIGURE THEM TO JENKINS
 SETUP:
 #STEP-1 : Create a server and install java-11
 amazon-linux-extras install java-openjdk11 -y
@@ -46,7 +46,7 @@ Host Key Verification Strategy: last option
 DASHBOARD -- > JOB -- > CONFIGURE -- > RESTRTICT WHERE THIS JOB RUN -- > LABEL: SLAVE1 -- > SAVE
 
 
-3. INSTALL TOMCAT ON SLAVE
+##3. INSTALL TOMCAT ON SLAVE
 SETUP: CREATE A NEW SERVER
 INSTALL JAVA: amazon-linux-extras install java-openjdk11 -y
 
@@ -80,11 +80,11 @@ CONNECTION:
 COPY PUBLIC IP:8080 
 manager apps -- > username: tomcat & password: raham123
 
-4. ADD CREDENTIALS OF SLAVE TO JENKINS
+##4. ADD CREDENTIALS OF SLAVE TO JENKINS
 manage jenkins -- > credentials -- > add creds -- > username: tomcat & passowrd: raham123 -- > save
 copy id and give to pipeline
 
-5. SETUP NEXUS & INTEGRATE TO JENKINS
+##5. SETUP NEXUS & INTEGRATE TO JENKINS
 Step 1: Login to your Linux server and update the yum packages. Also install required utilities.
 
 sudo yum update -y
@@ -108,7 +108,7 @@ Step 5: As a good security practice, it is not advised to run nexus service with
 
 sudo adduser nexus
 
-6. INSTALL DEPLOY TO CONTAINER PLUGIN
+##6. INSTALL DEPLOY TO CONTAINER PLUGIN
 manage jenkins -- > tools -- > install deply to container plugin
 
-7. WRITE AND RUN PIPELINE
+##7. WRITE AND RUN PIPELINE
