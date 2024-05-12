@@ -1,0 +1,112 @@
+create 3 instances (t2.micro) for jenkins,slave-1,slave-2 (should be allowed the all traffic to all the instances even nexus)
+create 1 instance (t2.medium) for nexus uses java-1.8.0
+ 
+
+In 1st instance(jenkins master)
+step1:vim jenkins.sh(copy the script and paste in this vim) 
+#STEP-1: INSTALLING GIT JAVA-1.8.0 MAVEN 
+yum install git java-1.8.0-openjdk maven -y
+
+#STEP-2: GETTING THE REPO (jenkins.io --> download -- > redhat)
+sudo wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo
+sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
+
+#STEP-3: DOWNLOAD JAVA11 AND JENKINS
+amazon-linux-extras install java-openjdk11 -y
+yum install jenkins -y
+update-alternatives --config java
+
+#STEP-4: RESTARTING JENKINS (when we download service it will on stopped state)
+systemctl start jenkins.service
+systemctl status jenkins.service
+
+Press i to insert and paste and come out of it esc:wq)
+ 
+step2:sh jenkins.sh(run the script)
+step3:It will ask the java version select-2 to run the jenkins(wait for sometime it will run the services and giving passwd)
+step4:copy the public ip and paste on new tab give:8080 because jenkins port number is 8080
+ cd /var/lib/jenkins/secrets/initialadminpassword
+step5:copy the passwd and paste it on jenkins dashboard and all the username passwd..........etc
+step6:go to manage jenkins>>create a master and slave it should be online
+step7:go to manage jenkins>> plugins>>avaiable plugins>>search for nexus artifact>>and deploy to container>>Install them
+step8:create a job>>pipeline>>write a pipeline there 
+
+
+tomcat credentials should be given in global
+manage jenkins>>credentials..global cred
+
+Tomcat deployment code is not there with me if you have it just type in stage 
+
+In 2nd instance(slave-1)
+step1:amazon-linux-extras install java-openjdk11 -y
+step2:vim tomcat.sh (copy the script and paste it Note:tomcat has changed go to git hub and edit the version to 9.0.85)
+amazon-linux-extras install java-openjdk11 -y
+wget https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.85/bin/apache-tomcat-9.0.85.tar.gz
+tar -zxvf apache-tomcat-9.0.85.tar.gz
+sed -i '56  a\<role rolename="manager-gui"/>' apache-tomcat-9.0.85/conf/tomcat-users.xml
+sed -i '57  a\<role rolename="manager-script"/>' apache-tomcat-9.0.85/conf/tomcat-users.xml
+sed -i '58  a\<user username="tomcat" password="yashu" roles="manager-gui, manager-script"/>' apache-tomcat-9.0.85/conf/tomcat-users.xml
+sed -i '59  a\</tomcat-users>' apache-tomcat-9.0.85/conf/tomcat-users.xml
+sed -i '56d' apache-tomcat-9.0.85/conf/tomcat-users.xml
+sed -i '21d' apache-tomcat-9.0.85/webapps/manager/META-INF/context.xml
+sed -i '22d'  apache-tomcat-9.0.85/webapps/manager/META-INF/context.xml
+sh apache-tomcat-9.0.85/bin/startup.sh
+
+step3:sh tomcat.sh(run the script)
+step4:u can see tomcat is started
+step5:copy the public ip and paste on new tab :8080
+step6:go to manage app (give tomcat username and password)
+
+
+In 3nd instance(slave-2)
+step1:amazon-linux-extras install java-openjdk11 -y
+step2:vim tomcat.sh (copy the script and paste it Note:tomcat has changed go to git hub and edit the version to 9.0.85)
+step3:sh tomcat.sh(run the script)
+step4:u can see tomcat is started
+step5:copy the public ip and paste on new tab :8080
+step6:go to manage app (give tomcat username and password)
+
+In nexus instance
+step1:amazon-linux-extras install java-openjdk11 -y
+step2:vim nexus.sh (copy the script and paste it)
+#create amazonlinux ec2 with t2.micro and 30 gb of ebs with port 8081 
+
+sudo yum update -y
+sudo yum install wget -y
+sudo yum install java-1.8.0-openjdk.x86_64 -y
+sudo mkdir /app && cd /app
+sudo wget -O nexus.tar.gz https://download.sonatype.com/nexus/3/latest-unix.tar.gz
+sudo tar -xvf nexus.tar.gz
+sudo mv nexus-3* nexus
+sudo adduser nexus
+sudo chown -R nexus:nexus /app/nexus
+sudo chown -R nexus:nexus /app/sonatype-work
+sudo echo "run_as_user="nexus"" > /app/nexus/bin/nexus.rc
+sudo tee /etc/systemd/system/nexus.service > /dev/null << EOL
+[Unit]
+Description=nexus service
+After=network.target
+
+[Service]
+Type=forking
+LimitNOFILE=65536
+User=nexus
+Group=nexus
+ExecStart=/app/nexus/bin/nexus start
+ExecStop=/app/nexus/bin/nexus stop
+User=nexus
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target
+EOL
+sudo chkconfig nexus on
+sudo systemctl start nexus
+sudo systemctl status nexus
+
+step3:sh nexus.sh(to run the script)
+step4:after running the script copy the public ip and paste give :8081
+step5:go to sign in
+step5:it will ask username and password
+step6: username:admin password:u can see the path go to that path and u may find the password
+step7:after login u may see the repositories click on it and give netflix as a repo name click on save
